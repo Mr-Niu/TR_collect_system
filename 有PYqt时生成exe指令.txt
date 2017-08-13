@@ -1,0 +1,1 @@
+pyinstaller --path D:\ProgramData\python35-32\Lib\site-packages\PyQt5\Qt\bin -F -w -i ./pics/client.ico client.py

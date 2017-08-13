@@ -42,10 +42,10 @@ class window(QMainWindow, QWidget):
 
         # 启动、停止、打开； 服务器信息
         self.scanButton = QPushButton()
-        self.scanButton.setText('扫描服务器')
+        self.scanButton.setText('扫描服务器(&S)')
         self.reloadButton =QPushButton()
-        self.reloadButton.setText('加载数据库')
-        self.openDateButton = QPushButton('打开数据库')
+        self.reloadButton.setText('加载数据库(&L)')
+        self.openDateButton = QPushButton('打开数据库(&O)')
         self.ipLabel = QLabel('服务器IP及端口：')
         self.ipLabel2 = QLabel('请先扫描服务器IP！')
         font = QFont('Arial')
@@ -62,7 +62,8 @@ class window(QMainWindow, QWidget):
         font.setPixelSize(24)
         self.trText.setFont(font)
         self.sendButton = QPushButton()
-        self.sendButton.setText('提交至服务器')
+        self.sendButton.setText('提交至服务器(&P)')
+        # self.sendButton.setShortcut(QKeySequence(Qt.ControlModifier+ Qt.Key_Enter))
 
         #布局
         self.hLayout1 = QHBoxLayout()
@@ -189,9 +190,9 @@ class window(QMainWindow, QWidget):
     def openDate(self):
         try:
             # os.system('excel.exe -readOnly '+filePath)
-            subprocess.Popen('excel.exe -readOnly '+filePath)
+            subprocess.Popen('excel.exe -readOnly ' + filePath)
         except:
-            self.barLabel.setText('Open data failed' + filePath)
+            self.barLabel.setText('打开失败，请确认是否已将Excel添加至系统环境变量')
 
     def loadData(self):
         print('loading data...')
@@ -217,8 +218,9 @@ class window(QMainWindow, QWidget):
         writeFile = copy(readFile)
         write_sheet = writeFile.get_sheet(0)
         number = 'ARVS-' + str(row)
+        t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         write_sheet.write(row, 0, number)
-        write_sheet.write(row, 1, serverIP + '(' + socket.gethostname() + ')')
+        write_sheet.write(row, 1, serverIP + '(' + socket.gethostname() + ') at ' + t)
         write_sheet.write(row, 2, text)
         writeFile.save(filePath)
         readFile.release_resources()
