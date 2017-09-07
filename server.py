@@ -3,7 +3,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import sys
 import subprocess
-import xlrd
 import os
 from TR_server import *
 import time
@@ -11,7 +10,6 @@ import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("server")
 
 text='ui'
-connectList=['提交过的IP:','192.123','123']
 dataPath = 'TR_data.xls'
 path = os.getcwd()
 filePath = path + '\\data\\' + dataPath
@@ -52,7 +50,7 @@ class window(QMainWindow, QWidget):
         self.reloadButton.setText('加载数据库')
         self.openDateButton = QPushButton('打开数据库')
         self.ipLabel = QLabel('本机IP及端口：')
-        ip = self.getIp() + ' : 6666'
+        ip = self.getIp() + ' : 6667'
         self.ipLabel2 = QLabel(ip)
         font = QFont('Arial')
         font.setBold(True)
@@ -66,8 +64,8 @@ class window(QMainWindow, QWidget):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setFixedWidth(200)
         self.scrollArea.setWidget(self.listLabel)
-        self.table = QTableWidget(10, 3)
-        self.table.setHorizontalHeaderLabels(['序号', '提交IP', '内容'])
+        self.table = QTableWidget(10, 4)
+        self.table.setHorizontalHeaderLabels(['序号', '提交IP', '内容', '附件'])
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.eventText = QPlainTextEdit()
         self.eventText = QTextBrowser()
@@ -117,7 +115,8 @@ class window(QMainWindow, QWidget):
         return ip
 
     # 更新组件
-    def update_widgets(self, connectList, text):
+    def update_widgets(self, text):
+        global connectList
         s=''
         for i in range(len(connectList)):
             s += connectList[i] +'\n'
@@ -135,7 +134,7 @@ class window(QMainWindow, QWidget):
             self.barLight.setPixmap(self.icon_right)
             self.barLabel.setText('Start server')
             self.server = server()
-            self.server.ud[list, str].connect(self.update_widgets)
+            self.server.ud[str].connect(self.update_widgets)
             # self.server.ud[list, str].connect(self.update_widgets)
             self.server.start()
 
@@ -166,11 +165,19 @@ class window(QMainWindow, QWidget):
             excel = xlrd.open_workbook(filePath)
             sheet = excel.sheet_by_index(0)
             row = sheet.nrows
+            for i in range(self.table.rowCount()):
+                for j in range(self.table.columnCount()):
+                    item = QTableWidgetItem('')
+                    self.table.setItem(i, j, item)
             for i in range(row):
                 if(self.table.rowCount()==i):
                     self.table.insertRow(i)
-                for j in range(3):
-                    item = QTableWidgetItem(sheet.cell(i, j).value)
+                for j in range(self.table.columnCount()):
+                    try:
+                        d = sheet.cell(i,j).value
+                    except:
+                        d=''
+                    item = QTableWidgetItem(d)
                     self.table.setItem(i, j, item)
         except:
             self.barLabel.setText('Load data error')
@@ -178,9 +185,9 @@ class window(QMainWindow, QWidget):
 
     def closeEvent(self, event):
         self.server.stop()
-        self.centralWidget().closeEvent(event)
+        # self.centralWidget().closeEvent(event)
         print('exitted')
-
+        self.close()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
